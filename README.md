@@ -1,142 +1,109 @@
-# o-services
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-animated-dark.svg">
+    <img alt="o-services" src="assets/logo-animated-light.svg" width="400">
+  </picture>
+  <br>
+  <a href="https://github.com/ofamtools/o-services/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/ofamtools/o-services"></a>
+  <a href="https://pkg.go.dev/ofam.dev/o-services"><img alt="Go Reference" src="https://pkg.go.dev/badge/ofam.dev/o-services.svg"></a>
+  <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/ofamtools/o-services"></a>
+</p>
 
-`o-services` lists the local processes that listen on a TCP port or hold a
-bound UDP socket: one row per endpoint, with the program, PID, address and
-port, and the process's working directory. When TUIOS can prove which pane or
-agent started a process, the row shows that pane, agent and the pane's mtm
-project; otherwise it says `unknown` and why. A selected TCP endpoint opens in
-the browser after you choose `http` or `https`.
+<p align="center">List local processes with open listening ports, PIDs, working directories, and proven origin.</p>
 
-It is an o-family app: oden dispatches the CLI, ochazuke supplies the TUI,
-settings, bindings and catalog. Nothing runs in the background: discovery
-happens when you run a command, when the TUI opens, and when you refresh.
+`o-services` surfaces only processes that hold an open listening port (TCP sockets in `LISTEN` and bound UDP sockets): one row per endpoint with the program, PID, bound address, port, and the process's working directory. When TUIOS can prove which pane or agent spawned the process, the row attributes that pane, agent, and the pane's `mtm` project; otherwise it explicitly marks provenance `unknown` and explains why. Any selected TCP endpoint opens directly in your browser with verified scheme selection (`http` or `https`).
 
-Build with the Go version in [go.mod](go.mod) or newer:
+It is an o-family extension: `oden` dispatches the CLI, `ochazuke` supplies the TUI, settings, keybindings, and catalog. Nothing runs as a persistent background daemon: discovery runs on demand when invoking a CLI verb, when opening the TUI, or upon explicit refresh (`r`).
+
+---
+
+## Installation
+
+Install using Go:
 
 ```sh
-make build          # ./o-services
+go install ofam.dev/o-services@latest
 ```
 
-## Commands
+Or build from source:
 
 ```sh
-o-services                                  # the Services page (TUI)
-o-services view --smoke --width 140         # discover once, print one frame
-o-services endpoint list --format table     # every endpoint, fresh
-o-services endpoint list                    # the same rows as JSON
-o-services endpoint show ID                 # one endpoint, its process and provenance
-o-services endpoint open ID http            # asks, re-checks, then opens http://ADDR:PORT/
-o-services endpoint open ID https --yes     # accept the question non-interactively
-o-services service list --format table      # one row per process, its endpoints joined
-o-services service show ID
-o-services services refresh                 # discover and print a summary
+make build          # outputs ./o-services
+cp o-services ~/bin/
 ```
 
-`ID` is the `id` of a row from `endpoint list` (or `service list`). An
-endpoint id is the process's birth key followed by transport, family, address
-and port, so it stays the same across refreshes while the same process holds
-the same socket, and never names a different process.
+Once on `PATH`, `o-services` is discovered by `o` and `mtm` as the `services` extension.
 
-On the Services page:
+---
+
+## CLI Usage
+
+```sh
+o-services                                  # Interactive Services TUI
+o-services endpoint list --format table     # Real-time table of all listening endpoints
+o-services endpoint list                    # Endpoints as JSON
+o-services endpoint show ID                 # Detailed inspection of one endpoint + provenance
+o-services endpoint open ID http            # Confirm target and open in default browser
+o-services endpoint open ID https --yes     # Non-interactive browser open
+o-services service list --format table      # Process-grouped view (endpoints joined)
+o-services service show ID                  # Inspect one process and all its listening ports
+o-services services refresh                 # Re-scan system and print discovery summary
+o-services view --smoke --width 140         # Headless single-frame render for testing
+```
+
+`ID` is the stable identifier from `endpoint list` or `service list`. It incorporates the process's boot id, PID, start time, transport, and socket address, ensuring it never collides or misidentifies a PID reused by an exited process.
+
+---
+
+## Interactive TUI
+
+Launch with `o-services` or navigate to the **Services** tab inside `mtm`.
 
 | Key | Verb | What it does |
 | --- | --- | --- |
-| `r` | `services.refresh` | Discover again, off the UI loop; the selection is kept by endpoint id |
-| `o` | `endpoint.open` | Choose http or https, confirm the exact URL, re-check, open |
-| `q` | `app.quit` | Quit |
+| `r` | `services.refresh` | Re-scan the kernel process & socket tables off the UI loop; preserves selection |
+| `o` | `endpoint.open` | Choose `http` or `https`, review target URL, re-verify process birth, and open |
+| `q` | `app.quit` | Exit the viewer |
 
-List navigation, filtering, the palette (`:`) and help (`?`) are ochazuke's.
-Every key is a binding row: rebind or remove them in your `bindings.json`; the
-verbs stay reachable from the palette and the CLI.
+Standard Ochazuke motions apply: `/` filters rows, `j`/`k` navigates, `ctrl+d`/`ctrl+u` half-page scrolls, `:` opens the command palette, and `?` displays interactive help.
 
-## What is listed
+---
 
-- TCP sockets in LISTEN and UDP sockets bound to a nonzero local port, of the
-  processes the current user can see. UDP rows say `bound`: a bound socket is
-  not a claim that anything serves it.
-- macOS: `lsof -F` machine fields for sockets (one call per protocol), one
-  batched PID-targeted `lsof -d cwd` call for working directories, and the
-  kernel's process table (`sysctl kern.proc`) for PID, parent, start time and
-  short name.
-- Linux: `/proc/net/{tcp,tcp6,udp,udp6}`, socket inodes matched to
-  `/proc/PID/fd` in the current network namespace only, and `/proc/PID/cwd`.
-  Processes of other users count as `restricted`, outside the listing's scope.
-- Other platforms: an explicit "unsupported" problem, never an empty success.
-- The program column is the kernel's short process name. o-services never reads
-  a process's environment or full command line.
+## What Is Listed
 
-A scan reports `complete`, any `problems`, the `restricted` count and when it
-ran. A failed or partial scan never looks like an empty one: the page status
-says `INCOMPLETE`, and rows kept from an earlier scan are marked stale and
-cannot be opened until a refresh confirms them. A stopped process, or one that
-closed all its sockets, drops off at the next scan; nothing is persisted.
+- **TCP sockets in LISTEN** and **UDP sockets bound** to a local port visible to the current user. UDP rows note `bound`.
+- **macOS:** `lsof -F` machine parsing for socket states, batched PID-targeted `lsof -d cwd` for working directories, and `sysctl kern.proc` for start times and short names.
+- **Linux:** `/proc/net/{tcp,tcp6,udp,udp6}`, socket inodes matched against `/proc/PID/fd`, and `/proc/PID/cwd`.
+- **No environment snooping:** Only kernel process names and verified working directories are read; environments and secret CLI arguments are never collected.
 
-## Identity
+---
 
-A process is identified by boot id + PID + kernel start time (Linux clock
-ticks since boot, macOS microseconds since the epoch). Each is read before and
-after the scan gathers sockets and cwd; a process that exited or changed in
-between is dropped. A process whose start time cannot be read is still listed,
-with `identity_status: unavailable` and an id that lasts one scan only: it gets
-no provenance and cannot be opened. There is no PID-only fallback.
+## Provenance Tracking
 
-## Provenance
+When running alongside a TUIOS daemon publishing verified process births:
 
-Provenance needs a TUIOS daemon that publishes, on `list-agents` rows:
+- **Pane:** Proven if the pane's root process is on the process ancestry chain.
+- **Agent:** Proven if the verified agent hook's process lineage matches in the same pane.
+- **Project:** Attributed from `mtm`'s typed pane project assignment, never guessed from directories or names.
 
-- `pane_process`: the pane's root process as the daemon spawned it (pid, boot
-  id, start time);
-- `agent_process`: an agent's root process, published only after the daemon
-  verified the agent hook's process lineage inside that pane.
+Processes launched outside TUIOS or without unbroken parentage remain honest: marked `unknown` with the specific reason.
 
-o-services walks each service's ancestry with the kernel process table,
-re-reads it, and attributes:
-
-- the **pane** whose `pane_process` birth is on the ancestry;
-- the **agent** whose `agent_process` birth is on the ancestry, in that same
-  pane (a shell sibling of the agent in the same pane is not the agent's);
-- the **project** from mtm's typed pane assignment (`mtm pane list --all`),
-  never from the cwd or a name.
-
-The agent's current conversation is shown as current context only: it is not
-the conversation that started the service. An origin seen once is kept for that
-same process incarnation for as long as the TUI runs, even if the pane closes
-later; a restart does not reconstruct it.
-
-Anything that cannot be proven stays `unknown` with the reason: TUIOS not
-running, an older TUIOS without `pane_process`/`agent_process`, an unreadable
-ancestry, a process started outside every pane. Older TUIOS daemons still give
-a complete listing; only provenance is unknown.
-
-## Opening in the browser
-
-A port does not say which protocol it speaks, so `endpoint.open` always needs
-`http` or `https`; the TUI asks with a chooser, the CLI takes it as an
-argument. There is no probe and no guess from the port number.
-
-The URL is built from the endpoint's parsed address and port, with path `/`:
-`0.0.0.0` opens `127.0.0.1`, `::` opens `::1`, other addresses stay as bound
-(IPv6 bracketed, zones escaped). UDP rows, stale rows, rows without a verified
-birth, vanished endpoints and other schemes are refused. Before the handoff the
-question names the exact URL; after you accept, the process birth and the socket
-are checked again with a fresh scan, so another process that took the port is
-not opened as the one you selected. The opener is `open -- URL` on macOS and
-`xdg-open URL` on Linux. A race between that last check and the browser's
-connection remains and cannot be closed from here.
+---
 
 ## Settings
 
-| Setting | Default | Off means |
+| Setting | Default | Description |
 | --- | --- | --- |
-| `services.load-on-open` | `true` | The TUI opens with a "not loaded" page until `r` |
-| `services.provenance` | `true` | No TUIOS or mtm calls; every row says provenance `disabled` |
+| `services.load-on-open` | `true` | When `false`, the TUI opens unloaded until `r` is pressed |
+| `services.provenance` | `true` | When `false`, disables TUIOS/mtm ancestry walks |
 
-CLI list, show, open and refresh always discover, whatever `load-on-open` says.
-Settings live in ochazuke's settings file for `o-services` and on the Settings
-page.
+Configure via `o-services settings list`, `ochazuke.settings`, or in `~/.config/o-services/settings.json`.
 
-## Development
+---
 
-`make check` runs gofmt, vet and the tests with `GOWORK=off`. Tests use fake
-scanners and openers and a temp HOME/XDG; none opens a browser or reads your
-config. See [AGENTS.md](AGENTS.md) for the rules.
+## Development & Testing
+
+```sh
+make check          # runs gofmt, go vet, and unit tests
+make test           # runs test suite with isolated temp XDG/HOME
+```

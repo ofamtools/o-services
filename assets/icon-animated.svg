@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="o-services">
+<title>o-services</title>
+<rect width="128" height="128" rx="28" fill="#0c1524"/>
+<style>
+.w1,.w2,.w3,.led{transform-box:fill-box;transform-origin:50% 100%}
+@media (prefers-reduced-motion: no-preference){
+  .w1{animation:pulse-w1 3.2s cubic-bezier(.45,0,.25,1) infinite}
+  .w2{animation:pulse-w2 3.2s cubic-bezier(.45,0,.25,1) infinite}
+  .w3{animation:pulse-w3 3.2s cubic-bezier(.45,0,.25,1) infinite}
+  .led{animation:pulse-led 3.2s cubic-bezier(.45,0,.25,1) infinite}
+}
+@keyframes pulse-w1{0%,100%{opacity:.35;transform:scale(0.96)}20%{opacity:1;transform:scale(1.04)}45%{opacity:.35;transform:scale(0.96)}}
+@keyframes pulse-w2{0%,100%{opacity:.35;transform:scale(0.96)}10%{opacity:.35;transform:scale(0.96)}30%{opacity:1;transform:scale(1.04)}55%{opacity:.35;transform:scale(0.96)}}
+@keyframes pulse-w3{0%,100%{opacity:.35;transform:scale(0.96)}20%{opacity:.35;transform:scale(0.96)}40%{opacity:1;transform:scale(1.04)}65%{opacity:.35;transform:scale(0.96)}}
+@keyframes pulse-led{0%,100%{opacity:.6}20%,40%{opacity:1}60%{opacity:.6}}
+</style><g>
+<path class="w3" d="M 24 24 A 52 52 0 0 1 104 24" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"/>
+<path class="w2" d="M 36 38 A 36 36 0 0 1 92 38" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"/>
+<path class="w1" d="M 48 52 A 20 20 0 0 1 80 52" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"/>
+<rect x="36" y="66" width="56" height="38" rx="10" fill="#0284c7"/>
+<path d="M46 82h36v14a4 4 0 0 1-4 4H50a4 4 0 0 1-4-4V82z" fill="#0c1524"/>
+<circle class="led" cx="54" cy="74" r="3.5" fill="#38bdf8"/>
+<circle class="led" cx="74" cy="74" r="3.5" fill="#38bdf8"/>
+</g>
+</svg>
