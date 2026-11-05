@@ -8,6 +8,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
+	"ofam.dev/ochazuke"
 )
 
 func press(p *page, key rune) {
@@ -86,5 +87,37 @@ func drain(p *page, cmd tea.Cmd, depth int) {
 	default:
 		_, next := p.Update(m)
 		drain(p, next, depth+1)
+	}
+}
+
+// The id parameters declare the selected row (Parameter.From), so the
+// help's run of an unbound endpoint.open, with no binding from, asks only
+// for the scheme.
+func TestParameterSourceFillsTheEndpointID(t *testing.T) {
+	f, _, _, _, _ := twoPortService()
+	var opened []string
+	a, _ := testApp(t, f, func(context.Context) metadata { return metadata{} }, &opened)
+	if err := a.r.Settings().Set("services.load-on-open", false); err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"endpoint.open", "endpoint.show", "service.show"} {
+		if got := a.r.Operations[key].Parameters["id"].From; got != ochazuke.SourceRow {
+			t.Errorf("%s id From %q", key, got)
+		}
+	}
+	p, err := mountPage(a)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.m.Width, p.m.Height = 140, 30
+	p.m.View()
+	p.Update(loadedMsg{a.collect(context.Background(), Snapshot{}, true)})
+	press(p, 'j')
+	if err := a.r.RunUnbound(a.r.BaseFocus(), ochazuke.Request{Noun: "endpoint", Verb: "open"}); err != nil {
+		t.Fatal(err)
+	}
+	frame := ansi.Strip(p.m.View().Content)
+	if !strings.Contains(frame, "scheme") || strings.Count(frame, "(none)") != 1 {
+		t.Fatalf("the form did not take the selected endpoint:\n%s", frame)
 	}
 }

@@ -74,7 +74,7 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 		return nil, err
 	}
 	id := func(noun string) ochazuke.Parameter {
-		return ochazuke.Parameter{Type: "string", Required: true, Noun: noun, Description: "The exact " + noun + " id (from " + noun + " list); defaults to the selected row"}
+		return ochazuke.Parameter{Type: "string", Required: true, Noun: noun, Description: "The exact " + noun + " id (from " + noun + " list); defaults to the selected row", From: ochazuke.SourceRow}
 	}
 	a.r.Define("services").Verb("refresh", a.refresh, "Discover local TCP listeners and bound UDP sockets again")
 	a.r.Define("endpoint").Verb("list", a.listEndpoints, "List local endpoints: one row per listening TCP or bound UDP socket of one process").Rows("endpoint").Fetch().Quiet()
@@ -96,7 +96,7 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 	// Every key is a binding row; help and the footer read them.
 	a.r.Define("endpoint").Mode("normal").
 		Bind("r", ochazuke.Do("services.refresh")).
-		Bind("o", ochazuke.Do("endpoint.open").FromRow("id", ""))
+		Bind("o", ochazuke.Do("endpoint.open"))
 	if err := ocli.DeclarePage(a.r, servicesPage()); err != nil {
 		return nil, err
 	}
