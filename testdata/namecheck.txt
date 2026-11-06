@@ -1,0 +1,7 @@
+# namecheck baseline: file, function, kind, literal, count, reason (tab separated).
+# A row with a reason is a legitimate use that stays. A row without one is debt that may only shrink:
+# NAMECHECK_UPDATE=1 removes rows and lowers counts, never adds them. Adding a row is a reviewed edit.
+discover_darwin.go	system.Discover	cyclo	"-"	27
+discover_linux.go	system.Discover	cyclo	"-"	39
+discover_parse.go	parseLSOF	cyclo	"-"	29
+provenance.go	traceOrigin	cyclo	"-"	26
