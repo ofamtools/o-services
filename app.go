@@ -91,8 +91,8 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 	if err := a.r.AddVerbCheck("endpoint.open", ochazuke.VerbCheck{Name: "browser-target", Check: a.confirmOpen}); err != nil {
 		return nil, err
 	}
-	a.r.Define("endpoint").Columns(endpointColumns...)
-	a.r.Define("service").Columns(serviceColumns...)
+	a.r.Define("endpoint").Columns(endpointColumns...).Props(factProps("endpoint", endpointFields)...).Store(a.endpointStore())
+	a.r.Define("service").Columns(serviceColumns...).Props(factProps("service", serviceFields)...).Store(a.serviceStore())
 	// Every key is a binding row; help and the footer read them.
 	a.r.Define("endpoint").Mode("normal").
 		Bind("r", ochazuke.Do("services.refresh")).
