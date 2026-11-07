@@ -63,6 +63,17 @@ var detailFields = []string{
 	"provenance_status", "scan_complete", "scan_restricted", "scan_problems",
 }
 
+// Namespace is the singular namespace o-services declares (lexicon plan):
+// its operations are service.<noun>.<verb> and a host mounts its catalog
+// under it.
+const Namespace = "service"
+
+func init() {
+	if err := ochazuke.DeclareNamespace(Namespace); err != nil {
+		panic(err)
+	}
+}
+
 func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context.Context) metadata, opener func(context.Context, string) error) (*App, error) {
 	a := &App{in: in, out: out, errOut: errOut, scan: scan, metadata: meta, opener: opener}
 	a.r = ochazuke.NewRuntime()
@@ -104,9 +115,9 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 }
 
 func (a *App) setParams(key string, params map[string]ochazuke.Parameter) {
-	op := a.r.Operations[key]
+	op := a.r.Operations.At(ochazuke.Key(key))
 	op.Parameters = params
-	a.r.Operations[op.Key()] = op
+	a.r.Operations.Set(op)
 }
 
 func servicesPage() ocli.CatalogPage {

@@ -101,7 +101,7 @@ func TestParameterSourceFillsTheEndpointID(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"endpoint.open", "endpoint.show", "service.show"} {
-		if got := a.r.Operations[key].Parameters["id"].From; got != ochazuke.SourceRow {
+		if got := a.r.Operations.At(ochazuke.Key(key)).Parameters["id"].From; got != ochazuke.SourceRow {
 			t.Errorf("%s id From %q", key, got)
 		}
 	}

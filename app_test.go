@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"ofam.dev/ochazuke"
+	ocli "ofam.dev/ochazuke/cli"
 )
 
 // testApp runs the real runtime and CLI shell over a fixture host, with its
@@ -131,5 +134,28 @@ func TestPaneProjects(t *testing.T) {
 	}
 	if _, err := paneProjects([]byte(`{"error":"x"}`)); err == nil {
 		t.Fatal("non-row answer accepted")
+	}
+}
+
+func TestCatalogDeclaresSingularNamespace(t *testing.T) {
+	f, _, _, _, _ := twoPortService()
+	var opened []string
+	a, _ := testApp(t, f, noMetadata(t), &opened)
+	b, e := ocli.Catalog(a.r, "o-services", "test")
+	if e != nil {
+		t.Fatal(e)
+	}
+	var doc ocli.CatalogDoc
+	if e = json.Unmarshal(b, &doc); e != nil {
+		t.Fatal(e)
+	}
+	if doc.Namespace != "service" || ochazuke.DefaultNamespace != "service" {
+		t.Fatalf("catalog namespace %q, default %q; want service", doc.Namespace, ochazuke.DefaultNamespace)
+	}
+	if got, e := ocli.CatalogNamespace(doc, "o-services"); e != nil || got != "service" {
+		t.Fatal(got, e)
+	}
+	if op, ok := a.r.Operations.Find("service.list"); !ok || op.Key.Full() != "service.service.list" {
+		t.Fatal(op.Key, ok)
 	}
 }
