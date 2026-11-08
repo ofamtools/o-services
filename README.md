@@ -11,7 +11,7 @@
 
 <p align="center">List local processes with open listening ports, PIDs, working directories, and proven origin.</p>
 
-`o-services` surfaces only processes that hold an open listening port (TCP sockets in `LISTEN` and bound UDP sockets): one row per endpoint with the program, PID, bound address, port, and the process's working directory. When TUIOS can prove which pane or agent spawned the process, the row attributes that pane, agent, and the pane's `mtm` project; otherwise it explicitly marks provenance `unknown` and explains why. Any selected TCP endpoint opens directly in your browser with verified scheme selection (`http` or `https`).
+`o-services` surfaces only processes that hold an open listening port (TCP sockets in `LISTEN` and bound UDP sockets): one row per endpoint with the program, PID, bound address, port, and the process's working directory. When the mtm daemon can prove which pane or agent spawned the process, the row attributes that pane, agent, and the pane's `mtm` project; otherwise it explicitly marks provenance `unknown` and explains why. Any selected TCP endpoint opens directly in your browser with verified scheme selection (`http` or `https`).
 
 It is an o-family extension: `oden` dispatches the CLI, `ochazuke` supplies the TUI, settings, keybindings, and catalog. Nothing runs as a persistent background daemon: discovery runs on demand when invoking a CLI verb, when opening the TUI, or upon explicit refresh (`r`).
 
@@ -80,7 +80,7 @@ Standard Ochazuke motions apply: `/` filters rows, `j`/`k` navigates, `ctrl+d`/`
 
 ## Provenance Tracking
 
-When running alongside a TUIOS daemon publishing verified process births:
+When running alongside an mtm daemon publishing verified process births:
 
 - **Pane:** Proven if the pane's root process is on the process ancestry chain.
 - **Agent:** Proven if the verified agent hook's process lineage matches in the same pane.

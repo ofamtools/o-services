@@ -118,11 +118,11 @@ func TestProvenanceSettingOff(t *testing.T) {
 func TestMissingProducerKeepsRowsUnknown(t *testing.T) {
 	f, _, _, _, _ := twoPortService()
 	var opened []string
-	a, out := testApp(t, f, func(context.Context) metadata { return metadata{Problem: "tuios list-agents: not running"} }, &opened)
+	a, out := testApp(t, f, func(context.Context) metadata { return metadata{Problem: "mtm agent scan: not running"} }, &opened)
 	if err := a.shell().Run(context.Background(), []string{"endpoint", "list"}); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), "unknown: tuios list-agents: not running") || strings.Count(out.String(), `"noun":"endpoint"`) != 3 {
+	if !strings.Contains(out.String(), "unknown: mtm agent scan: not running") || strings.Count(out.String(), `"noun":"endpoint"`) != 3 {
 		t.Fatalf("listing hid rows or the reason: %s", out)
 	}
 }

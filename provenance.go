@@ -36,8 +36,8 @@ func readMetadata(ctx context.Context) metadata {
 		server = "default"
 	}
 	m := metadata{Namespace: "tuios/" + server, Projects: make(map[string]string)}
-	answer := command(ctx, "tuios", "call", "list-agents", `{"all":true,"all_sessions":true}`)
-	if err := answer.error("tuios list-agents"); err != nil {
+	answer := command(ctx, "mtm", "agent", "scan", "--all", "--all_sessions", "--json")
+	if err := answer.error("mtm agent scan"); err != nil {
 		m.Problem = err.Error()
 		return m
 	}
@@ -45,11 +45,11 @@ func readMetadata(ctx context.Context) metadata {
 		Agents []paneMetadata `json:"agents"`
 	}
 	if err := json.Unmarshal(answer.Output, &response); err != nil {
-		m.Problem = "invalid TUIOS metadata: " + err.Error()
+		m.Problem = "invalid agent metadata: " + err.Error()
 		return m
 	}
 	if response.Agents == nil {
-		m.Problem = "TUIOS response has no agents array"
+		m.Problem = "agent scan has no agents array"
 		return m
 	}
 	m.Panes = response.Agents
