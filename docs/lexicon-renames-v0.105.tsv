@@ -1,0 +1,5 @@
+kind	old	new	note
+noun	service.services	service.service (collection-scope verb)	the plural services noun is gone
+operation	service.services.refresh	service.service.refresh (Subject: collection)	acts on the whole collection; main noun
+field	state (endpoint)	status	json key, Go field, endpoint prop and detail field (listen, bound)
+binding	r -> services.refresh	r -> service.refresh	

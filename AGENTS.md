@@ -25,7 +25,7 @@ TODO.md or docs/plans/ to this repo.
 - Never read a process's environment or full command line; the kernel short
   name is the program column.
 - No daemon, watcher, poller, killer, scanner of remote hosts or HTTP probe.
-  Discovery runs on CLI calls, at TUI open (setting) and on `services.refresh`.
+  Discovery runs on CLI calls, at TUI open (setting) and on `service.refresh`.
 - A failed or partial scan must not look like an empty, complete one.
 - Keys are binding rows; never bind F1 to F12.
 - Tests run with a temp HOME/XDG (`testApp` does this) and fake openers and

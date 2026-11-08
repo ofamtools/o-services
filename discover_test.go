@@ -35,7 +35,7 @@ func TestLSOFMachineRecords(t *testing.T) {
 	if err != nil || len(rows[42]) != 2 {
 		t.Fatalf("rows=%+v error=%v", rows, err)
 	}
-	if rows[42][0].Address != "::1" || rows[42][0].Port != 8080 || rows[42][1].Address != "0.0.0.0" || rows[42][1].State != "bound" {
+	if rows[42][0].Address != "::1" || rows[42][0].Port != 8080 || rows[42][1].Address != "0.0.0.0" || rows[42][1].Status != "bound" {
 		t.Fatalf("bad socket fields: %+v", rows[42])
 	}
 	if _, err := parseLSOF([]byte("p42\x00f3\x00tIPv4\x00PTCP\x00nnot-an-address\x00TST=LISTEN\x00")); err == nil {

@@ -155,9 +155,9 @@ func parseLSOF(data []byte) (map[int][]Endpoint, error) {
 			return nil
 		}
 		if e.Transport == "tcp" {
-			e.State = "listen"
+			e.Status = "listen"
 		} else {
-			e.State = "bound"
+			e.Status = "bound"
 		}
 		rows[pid] = append(rows[pid], e)
 		return nil

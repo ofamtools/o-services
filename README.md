@@ -61,7 +61,7 @@ Launch with `o-services` or navigate to the **Services** tab inside `mtm`.
 
 | Key | Verb | What it does |
 | --- | --- | --- |
-| `r` | `services.refresh` | Re-scan the kernel process & socket tables off the UI loop; preserves selection |
+| `r` | `service.refresh` | Re-scan the kernel process & socket tables off the UI loop; preserves selection |
 | `o` | `endpoint.open` | Choose `http` or `https`, review target URL, re-verify process birth, and open |
 | `q` | `app.quit` | Exit the viewer |
 

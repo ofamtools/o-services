@@ -72,7 +72,7 @@ type Endpoint struct {
 	Family    string `json:"family"`
 	Address   string `json:"address"`
 	Port      uint16 `json:"port"`
-	State     string `json:"state"`
+	Status    string `json:"status"`
 }
 
 func (e Endpoint) sameSocket(other Endpoint) bool {
@@ -125,9 +125,9 @@ func (s *Snapshot) add(p Process, endpoints []Endpoint) {
 		}
 		seen[e.ID] = true
 		if e.Transport == "tcp" {
-			e.State = "listen"
+			e.Status = "listen"
 		} else {
-			e.State = "bound"
+			e.Status = "bound"
 		}
 		s.Endpoints = append(s.Endpoints, e)
 	}

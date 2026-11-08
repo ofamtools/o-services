@@ -21,7 +21,7 @@ const (
 
 // App owns the last discovery snapshot. A CLI call collects a fresh one on
 // first use (each call is a fresh process); the TUI keeps the snapshot it
-// last landed and replaces it only through services.refresh.
+// last landed and replaces it only through service.refresh.
 type App struct {
 	r           *ochazuke.Runtime
 	in          io.Reader
@@ -56,7 +56,7 @@ var serviceColumns = []ochazuke.Column{
 }
 
 var detailFields = []string{
-	"program", "pid", "url_hint", "transport", "family", "address", "port", "state",
+	"program", "pid", "url_hint", "transport", "family", "address", "port", "status",
 	"cwd", "cwd_status", "identity_status", "stale", "observed_at",
 	"origin_pane", "origin_agent", "origin_harness", "origin_project", "origin_source", "origin_observed_at",
 	"current_pane", "current_project", "current_conversation", "current_status",
@@ -79,7 +79,7 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 	a.r = ochazuke.NewRuntime()
 	a.r.Config().App = "o-services"
 	if err := a.r.DeclareSetting(
-		ochazuke.Setting{Name: "services.load-on-open", Type: ochazuke.SettingBoolean, Default: true, Description: "Discover services when the TUI opens; off opens a not-loaded page until services.refresh"},
+		ochazuke.Setting{Name: "services.load-on-open", Type: ochazuke.SettingBoolean, Default: true, Description: "Discover services when the TUI opens; off opens a not-loaded page until service.refresh"},
 		ochazuke.Setting{Name: "services.provenance", Type: ochazuke.SettingBoolean, Default: true, Description: "Read TUIOS pane/agent and mtm project metadata to attribute services; off makes no metadata calls and shows provenance disabled"},
 	); err != nil {
 		return nil, err
@@ -87,10 +87,10 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 	id := func(noun string) ochazuke.Parameter {
 		return ochazuke.Parameter{Type: "string", Required: true, Noun: noun, Description: "The exact " + noun + " id (from " + noun + " list); defaults to the selected row", From: ochazuke.SourceRow}
 	}
-	a.r.Define("services").Verb("refresh", a.refresh, "Discover local TCP listeners and bound UDP sockets again")
 	a.r.Define("endpoint").Verb("list", a.listEndpoints, "List local endpoints: one row per listening TCP or bound UDP socket of one process").Rows("endpoint").Fetch().Quiet()
 	a.r.Define("endpoint").Verb("show", a.showEndpoint, "Show an endpoint with its process, cwd and provenance").Positional("id")
 	a.r.Define("endpoint").Verb("open", a.openEndpoint, "Open a TCP endpoint in the browser with an explicit http or https scheme, after revalidating its process").Positional("id", "scheme")
+	a.r.Define("service").Main().Verb("refresh", a.refresh, "Discover local TCP listeners and bound UDP sockets again").OfCollection()
 	a.r.Define("service").Verb("list", a.listServices, "List processes with at least one listening or bound socket").Rows("service").Fetch().Quiet()
 	a.r.Define("service").Verb("show", a.showService, "Show a service process with its endpoints and provenance").Positional("id")
 	a.setParams("endpoint.show", map[string]ochazuke.Parameter{"id": id("endpoint")})
@@ -106,7 +106,7 @@ func newApp(in io.Reader, out, errOut io.Writer, scan scanner, meta func(context
 	a.r.Define("service").Columns(serviceColumns...).Props(factProps("service", serviceFields)...).Store(a.serviceStore())
 	// Every key is a binding row; help and the footer read them.
 	a.r.Define("endpoint").Mode("normal").
-		Bind("r", ochazuke.Do("services.refresh")).
+		Bind("r", ochazuke.Do("service.refresh")).
 		Bind("o", ochazuke.Do("endpoint.open"))
 	if err := ocli.DeclarePage(a.r, servicesPage()); err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (a *App) current(ctx context.Context) (Snapshot, error) {
 		a.apply(a.collect(ctx, Snapshot{}, a.r.Settings().Bool("services.provenance")))
 	}
 	if !a.loaded {
-		return Snapshot{}, errors.New("services are not loaded yet; run services.refresh (r)")
+		return Snapshot{}, errors.New("services are not loaded yet; run service.refresh (r)")
 	}
 	return a.snapshot, nil
 }
@@ -366,7 +366,7 @@ func endpointData(s Snapshot, svc Service, e Endpoint) map[string]any {
 	delete(d, "endpoints")
 	d["id"], d["service"] = e.ID, svc.ID
 	d["label"] = svc.Command + " " + endpointLabel(e)
-	d["transport"], d["family"], d["address"], d["port"], d["state"] = e.Transport, e.Family, e.Address, int(e.Port), e.State
+	d["transport"], d["family"], d["address"], d["port"], d["status"] = e.Transport, e.Family, e.Address, int(e.Port), e.Status
 	if e.Transport == "tcp" {
 		u, _ := browserURL(e, "http")
 		d["url_hint"] = strings.TrimPrefix(u, "http://") + " (choose http or https when opening)"

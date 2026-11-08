@@ -11,7 +11,7 @@ import (
 // rows the named verbs list and show answer, from the same snapshot (a CLI
 // call discovers once; the TUI answers the last landed one). A service is
 // a process with a socket; an endpoint is one socket of it. refresh
-// (services.refresh) is how the snapshot changes; nothing here writes.
+// (service.refresh) is how the snapshot changes; nothing here writes.
 
 func factProps(noun string, fields []struct{ name, kind, desc string }) []ochazuke.PropSpec {
 	props := []ochazuke.PropSpec{
@@ -47,12 +47,12 @@ var endpointFields = append([]struct{ name, kind, desc string }{
 	{"family", "string", "The address family"},
 	{"address", "string", "The bound address"},
 	{"port", ochazuke.SettingInteger, "The port"},
-	{"state", "string", "The socket's state"},
+	{"status", "string", "The socket's state"},
 	{"url_hint", "string", "The URL a browser would open, for a TCP socket"},
 }, serviceFields[:len(serviceFields)-1]...)
 
 func (a *App) serviceStore() ochazuke.Store {
-	return ochazuke.Store{Kind: ochazuke.Collection, Facts: true,
+	return ochazuke.Store{Kind: ochazuke.KindCollection, Facts: true,
 		List: func(ochazuke.Ctx, ochazuke.ListQuery) ([]ochazuke.Thing, error) {
 			s, err := a.current(background())
 			if err != nil {
@@ -79,7 +79,7 @@ func (a *App) serviceStore() ochazuke.Store {
 }
 
 func (a *App) endpointStore() ochazuke.Store {
-	return ochazuke.Store{Kind: ochazuke.Collection, Facts: true,
+	return ochazuke.Store{Kind: ochazuke.KindCollection, Facts: true,
 		List: func(ochazuke.Ctx, ochazuke.ListQuery) ([]ochazuke.Thing, error) {
 			s, err := a.current(background())
 			if err != nil {

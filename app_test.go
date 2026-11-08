@@ -32,9 +32,9 @@ func testApp(t *testing.T, f fixtureScanner, meta func(context.Context) metadata
 func twoPortService() (fixtureScanner, Service, Endpoint, Endpoint, Endpoint) {
 	birth := Birth{PID: 40, BootID: "boot", StartKind: "linux-ticks", StartValue: "10"}
 	svc := Service{ID: birth.Key(), Process: Process{Birth: birth, Command: "server", CWD: "/srv", CWDStatus: "available"}, IdentityStatus: "verified"}
-	a := Endpoint{ID: svc.ID + "/tcp/ipv4/127.0.0.1/8080", Service: svc.ID, Transport: "tcp", Family: "ipv4", Address: "127.0.0.1", Port: 8080, State: "listen"}
-	b := Endpoint{ID: svc.ID + "/tcp/ipv6/::/9090", Service: svc.ID, Transport: "tcp", Family: "ipv6", Address: "::", Port: 9090, State: "listen"}
-	u := Endpoint{ID: svc.ID + "/udp/ipv4/0.0.0.0/5353", Service: svc.ID, Transport: "udp", Family: "ipv4", Address: "0.0.0.0", Port: 5353, State: "bound"}
+	a := Endpoint{ID: svc.ID + "/tcp/ipv4/127.0.0.1/8080", Service: svc.ID, Transport: "tcp", Family: "ipv4", Address: "127.0.0.1", Port: 8080, Status: "listen"}
+	b := Endpoint{ID: svc.ID + "/tcp/ipv6/::/9090", Service: svc.ID, Transport: "tcp", Family: "ipv6", Address: "::", Port: 9090, Status: "listen"}
+	u := Endpoint{ID: svc.ID + "/udp/ipv4/0.0.0.0/5353", Service: svc.ID, Transport: "udp", Family: "ipv4", Address: "0.0.0.0", Port: 5353, Status: "bound"}
 	f := fixtureScanner{snapshot: Snapshot{Complete: true, Services: []Service{svc}, Endpoints: []Endpoint{a, b, u}}, process: svc.Process}
 	return f, svc, a, b, u
 }
