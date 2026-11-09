@@ -31,7 +31,7 @@ type metadata struct {
 }
 
 func readMetadata(ctx context.Context) metadata {
-	server := os.Getenv("TUIOS_SERVER")
+	server := paneEnv(os.Getenv, "SERVER")
 	if server == "" {
 		server = "default"
 	}
